@@ -46,6 +46,24 @@ arduino-cli monitor -p /dev/ttyACM0 --config baudrate=115200
 Arduino IDE: open `firmware/RTC_Bench/RTC_Bench.ino`, board *ESP32C5 Dev
 Module*, **USB CDC On Boot: Disabled**, upload, Serial Monitor at 115200.
 
+### ESP-IDF version
+
+`firmware/RTC_Test_IDF/` is a plain RTC test for **ESP-IDF v6.1** (no
+Arduino). It prints the RTC time once per second and keeps the last-update
+record in the same RTC RAM bytes as the Arduino firmware. It has the commands
+`U` (set from NTP), `C` (drift check, 1 s resolution), `R` (register/RAM dump),
+`L` (last update) and `H` (help). The benchmark suites are in the Arduino
+firmware only.
+
+```bash
+cd firmware/RTC_Test_IDF
+cp sdkconfig.defaults.local.example sdkconfig.defaults.local   # set WiFi (or use idf.py menuconfig > RTC test)
+idf.py build
+idf.py -p /dev/ttyACM0 flash monitor                           # Ctrl+] exits the monitor
+```
+
+Close any other serial monitor first: only one program can open the port.
+
 ## Commands
 
 | Key | Action |
@@ -73,7 +91,8 @@ Normal output, once per second, read only from the RTC:
 ## Repository
 
 ```
-firmware/RTC_Bench/   sketch, DS1302 driver, credentials template
+firmware/RTC_Bench/   Arduino bench sketch, DS1302 driver, credentials template
+firmware/RTC_Test_IDF/ ESP-IDF v6.1 RTC test, DS1302 driver in C
 scripts/              build/flash, timestamped serial logger
 docs/HARDWARE.md      wiring, crystal data, DS1302Z+ comparison, load-capacitance analysis
 docs/BENCHMARK.md     test method and pass limits

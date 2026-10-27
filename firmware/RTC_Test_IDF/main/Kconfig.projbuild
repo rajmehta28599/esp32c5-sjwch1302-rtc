@@ -1,0 +1,11 @@
+menu "RTC test"
+
+    config RTC_WIFI_SSID
+        string "WiFi SSID"
+        default "your-ssid"
+
+    config RTC_WIFI_PASSWORD
+        string "WiFi password"
+        default "your-password"
+
+endmenu

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 — 2026-10-27
+
+- `firmware/RTC_Test_IDF/`: RTC test for ESP-IDF v6.1. It prints the RTC
+  time once per second and supports `U`, `C`, `R`, `L` and `H`. It uses a C
+  DS1302 driver with the same bus timing as `ds1302.h`, a USB-Serial-JTAG
+  console with a 50 ms write timeout, and `esp_netif_sntp` for NTP. WiFi runs
+  only during `U` and `C`. The WiFi network and password come from
+  `menuconfig` or a git-ignored `sdkconfig.defaults.local`.
+
 ## 1.0.0 — 2026-10-27
 
 First release.

@@ -29,6 +29,34 @@ scripts/build.sh /dev/ttyACM0     # build + flash
 
 From the Arduino IDE: open `firmware/RTC_Bench/RTC_Bench.ino`, set the options above, upload.
 
+### ESP-IDF project (`firmware/RTC_Test_IDF/`)
+
+| Item | Value |
+|---|---|
+| ESP-IDF | v6.1 |
+| Target | esp32c5 (set in `sdkconfig.defaults`) |
+| Partition table | single factory app, large (1.5 MB) |
+| Console | ESP-IDF log on UART0 at WARN level; application output on USB-Serial-JTAG through the driver, 50 ms write timeout |
+| WiFi credentials | `menuconfig` > *RTC test*, or `sdkconfig.defaults.local` (git-ignored; see `.example`) |
+
+```bash
+. ~/.espressif/tools/activate_idf_v6.1.sh      # or your export.sh
+cd firmware/RTC_Test_IDF
+idf.py build flash monitor
+```
+
+`sdkconfig.defaults` and `sdkconfig.defaults.local` apply only when no
+`sdkconfig` exists. Delete `sdkconfig` after editing them.
+
+| File | Contents |
+|---|---|
+| `main/main.c` | console, commands, WiFi STA, SNTP, 1 Hz RTC print loop |
+| `main/ds1302.c`, `ds1302.h` | DS1302 driver: one-time `gpio_config()`, `gpio_set_direction()` for the IO turnaround, 2.0 V worst-case timing |
+| `main/Kconfig.projbuild` | `CONFIG_RTC_WIFI_SSID`, `CONFIG_RTC_WIFI_PASSWORD` |
+
+The RTC RAM layout (bytes 0..4: last `U`) matches the Arduino firmware, so
+both read the same record.
+
 ## Source layout
 
 ```
