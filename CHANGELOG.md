@@ -1,0 +1,23 @@
+# Changelog
+
+## 1.0.0 — 2026-10-27
+
+First release.
+
+- Normal mode: offline RTC clock, printed once per second as Unix epoch and
+  local time, with the time since the last network update.
+- `U`: set the RTC from NTP, written so CE falls on the UTC second, then
+  verified on the first tick. The RTC − UTC phase is stored in battery-backed
+  RTC RAM.
+- `C`: RTC − UTC at millisecond resolution, plus drift since the last `U` in ppm.
+- `B`: non-destructive suite: register sanity, write protect, bus
+  integrity, tick stability offline and under WiFi RF stress, and a 10-minute
+  absolute accuracy test against NTP.
+- `D`: destructive suite: oscillator start-up time and ten calendar rollover
+  cases, with the RTC time restored to sub-millisecond afterwards.
+- `T`, `E`, `S`, `R`, `L`, `W`: bus test, bus timing, status, register dump,
+  last update, WiFi keep-alive.
+- Own DS1302 driver (`ds1302.h`) with worst-case datasheet timing. It turns
+  the IO line around with `gpio_set_direction()`, because `pinMode()` costs
+  12.2 ms per call on ESP32-C5 LP-capable pins.
+- Own SNTP client that reports the raw offset and round-trip delay.

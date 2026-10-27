@@ -1,0 +1,17 @@
+# Local WiFi credentials (copy firmware/RTC_Bench/credentials_example.h)
+credentials.h
+
+# Build output
+build/
+*.bin
+*.elf
+*.map
+
+# Raw serial logs (contain network details); publish curated results only
+*.log
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+__pycache__/

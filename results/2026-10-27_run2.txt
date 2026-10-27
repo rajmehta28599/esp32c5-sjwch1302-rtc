@@ -1,0 +1,93 @@
+# Run 2, 2026-10-27, board time IST. Host timestamps (NTP-synced PC) left of each line.
+# Firmware: 1.0.0 (release build except the [ACC] label, see RESULTS.md).
+# Contains: T (bus; second T with RAM alias probe), D (destructive), C (precise check), E (bus timing), B (benchmark).
+# An intermediate T whose alias probe compared against the written values (bug, fixed) is omitted.
+14:23:32.867 >>> T: Bus integrity test
+14:23:34.680 [BUS] RAM byte 6200 ops 200 err | RAM burst 10 ops 10 err | clock burst 3000 reads 0 err | 74.8 us per 1-byte read -> FAIL
+14:23:34.680 [BUS]   byte errors at RAM addr mask 0x00000100, bits 0x0F, first: addr 8 wrote 0x08 read 0x07
+14:23:34.680 [BUS]   burst errors at RAM addr mask 0x00000100
+14:25:34.917 >>> T: Bus integrity test
+14:25:36.730 [BUS] RAM byte 6200 ops 200 err | RAM burst 10 ops 10 err | clock burst 3000 reads 0 err | 75.0 us per 1-byte read -> FAIL
+14:25:36.730 [BUS]   byte errors at RAM addr mask 0x00000100, bits 0x0F, first: addr 8 wrote 0x08 read 0x07
+14:25:36.730 [BUS]   burst errors at RAM addr mask 0x00000100
+14:25:36.730 [BUS]   write RAM  7 = 0xA7: reads back 0xA7 (ok), also changed mask 0x00000100
+14:25:36.730 [BUS]   write RAM  8 = 0xA8: reads back 0x47 (NOT STORED), also changed mask 0x00000000
+14:25:36.831 [BUS] RAM alias probe: 2 of 31 addresses not independent
+14:25:51.537 >>> D: Destructive suite - halts the oscillator and rewrites the calendar.
+14:25:53.048 [DSTR] Capturing time reference (10 ticks) ...
+14:26:02.716 [DSTR] Reference: RTC second = 1000072.44 us of ESP32 time
+14:26:05.284 [OSC] run 1: halted yes, first tick after 1104.1 ms -> start-up 104.0 ms
+14:26:07.904 [OSC] run 2: halted yes, first tick after 1106.7 ms -> start-up 106.6 ms
+14:26:10.524 [OSC] run 3: halted yes, first tick after 1113.9 ms -> start-up 113.8 ms
+14:26:13.142 [OSC] run 4: halted yes, first tick after 1102.7 ms -> start-up 102.6 ms
+14:26:15.761 [OSC] run 5: halted yes, first tick after 1115.1 ms -> start-up 115.0 ms
+14:26:17.725 [CAL] Midnight + DOW 7->1       got 00:00:00 28/10/26 dow 1 | expected 00:00:00 28/10/26 dow 1 -> PASS
+14:26:19.740 [CAL] Hour carry 09:59:59       got 10:00:00 15/06/26 dow 2 | expected 10:00:00 15/06/26 dow 2 -> PASS
+14:26:21.755 [CAL] 30-day month 30/04        got 00:00:00 01/05/26 dow 4 | expected 00:00:00 01/05/26 dow 4 -> PASS
+14:26:23.770 [CAL] Feb non-leap 28/02/2027   got 00:00:00 01/03/27 dow 1 | expected 00:00:00 01/03/27 dow 1 -> PASS
+14:26:25.735 [CAL] Feb leap 28/02/2028       got 00:00:00 29/02/28 dow 3 | expected 00:00:00 29/02/28 dow 3 -> PASS
+14:26:27.750 [CAL] Leap day 29/02/2028       got 00:00:00 01/03/28 dow 4 | expected 00:00:00 01/03/28 dow 4 -> PASS
+14:26:29.765 [CAL] Year end 31/12/2026       got 00:00:00 01/01/27 dow 6 | expected 00:00:00 01/01/27 dow 6 -> PASS
+14:26:31.730 [CAL] Register wrap 2099->2000  got 00:00:00 01/01/00 dow 5 | expected 00:00:00 01/01/00 dow 5 -> PASS
+14:26:33.746 [CAL] 12h 11:59:59 AM -> 12 PM  got B2:00:00 15/06/26 dow 2 | expected B2:00:00 15/06/26 dow 2 -> PASS
+14:26:35.759 [CAL] 12h 11:59:59 PM -> 12 AM  got 92:00:00 16/06/26 dow 3 | expected 92:00:00 16/06/26 dow 3 -> PASS
+14:26:37.723 [RESULT] ==================== DESTRUCTIVE SUMMARY ====================
+14:26:37.724 [RESULT] Oscillator start-up (5x)   : PASS (min 102.6 / avg 108.4 / max 115.0 ms, limit 1000 ms)
+14:26:37.724 [RESULT] Calendar rollovers          : PASS (10/10)
+14:26:37.724 [RESULT] Time restore                : PASS (RTC - reference +29.2 us)
+14:26:37.724 [RESULT] ===============================================================
+14:26:37.724 [STAT] up 0d 00:01:07 | WiFi off | heap 239476 (min 234688) | rd_err 0 | jumps 0 | stalls 0 | glitch 0 | die 27.2 C
+14:26:48.555 >>> C: Check RTC vs NTP (RTC not written)
+14:26:48.555 [WiFi] Connecting ...
+14:26:51.123 [WiFi] Connected. RSSI=-43 dBm CH=8
+14:26:53.640 [NTP ] server pool.ntp.org, round-trip 183.5 ms
+14:26:53.640 [CHECK] RTC - UTC = -7683.1 ms (+/- 91.8 ms)
+14:26:53.640 [CHECK] Since last 'U' (27.34 h): -7683.1 ms -> -78.05 ppm (+/- 1.95), -6.74 s/day  [legacy U: phase assumed 0 +/- 100 ms]
+14:26:53.690 [WiFi] Off (offline)
+14:27:14.752 >>> E: Bus timing
+14:27:14.853 [BUS] 1-byte register read      : 74.8 us
+14:27:14.853 [BUS] 8-byte clock burst read   : 263.4 us
+14:27:14.853 [BUS] gpio_set_direction in+out : 5.70 us
+14:27:14.853 [BUS] gpio_config() (pinMode)   : 12230.5 us
+14:27:14.853 [BUS] rtc_gpio_deinit() GPIO4   : 12203.5 us (LP-capable pin: yes)
+14:27:14.853 [BUS] -> a pinMode()-based driver needs ~24.5 ms per transfer (2 pinMode calls)
+14:27:16.767 >>> B: Benchmark suite (non-destructive). 'X' aborts.
+14:27:16.767 [BENCH] FW 1.0.0 | die 27.2 C | ticks/test 120 | accuracy 10 min
+14:27:16.767 [BENCH] --- OFFLINE (WiFi off) ---
+14:27:16.767 [REG] CH=0 24h BCD valid DOW=3 WP=0x00 TCS=0x5C (power-on default, charger off) -> PASS
+14:27:16.767 [WP ] WP=1 reads 0x80, RAM write blocked | WP=0 reads 0x00, RAM write works -> PASS
+14:27:18.580 [BUS off] RAM byte 6200 ops 200 err | RAM burst 10 ops 10 err | clock burst 3000 reads 0 err | 75.1 us per 1-byte read -> FAIL
+14:27:18.580 [BUS off]   byte errors at RAM addr mask 0x00000100, bits 0x0F, first: addr 8 wrote 0x08 read 0x07
+14:27:18.580 [BUS off]   burst errors at RAM addr mask 0x00000100
+14:27:18.580 [BUS off]   write RAM  7 = 0xA7: reads back 0xA7 (ok), also changed mask 0x00000100
+14:27:18.580 [BUS off]   write RAM  8 = 0xA8: reads back 0x47 (NOT STORED), also changed mask 0x00000000
+14:27:18.630 [BUS off] RAM alias probe: 2 of 31 addresses not independent
+14:29:18.709 [TICK off] 120 ticks, 0 missed, 0 noisy captures | RTC vs ESP32 XTAL -75.12 ppm (+/- 0.11) | jitter rms 21.0 us, max 38.6 us | interval 1000009.0..1000146.0 us -> PASS
+14:29:18.709 [WiFi] Connecting ...
+14:29:21.732 [WiFi] Connected. RSSI=-40 dBm CH=8
+14:29:21.883 [BENCH] --- ONLINE + RF STRESS (200 x 1200 B UDP/s to gateway) ---
+14:29:23.848 [BUS rf] RAM byte 6200 ops 200 err | RAM burst 10 ops 10 err | clock burst 3000 reads 0 err | 80.6 us per 1-byte read -> FAIL
+14:29:23.848 [BUS rf]   byte errors at RAM addr mask 0x00000100, bits 0x0F, first: addr 8 wrote 0x08 read 0x07
+14:29:23.848 [BUS rf]   burst errors at RAM addr mask 0x00000100
+14:31:24.721 [TICK rf] 120 ticks, 0 missed, 0 noisy captures | RTC vs ESP32 XTAL -74.19 ppm (+/- 0.19) | jitter rms 36.4 us, max 158.9 us | interval 999919.0..1000245.0 us -> PASS
+14:31:24.721 [BENCH] stress packets sent 23564, failed 833
+14:31:24.721 [BENCH] --- ONLINE ACCURACY vs NTP (10 min) ---
+14:41:26.645 [ACC] 10.0 min, 600 ticks (13 missed, 0 noisy), NTP 19/21 samples used, best RTT 172.9 ms, offset fit rms 10.26 ms
+14:41:26.696 [WiFi] Off (offline)
+14:41:26.696 [RESULT] ====================== BENCHMARK SUMMARY ======================
+14:41:26.696 [RESULT] Register sanity             : PASS
+14:41:26.696 [RESULT] Write protect               : PASS
+14:41:26.696 [RESULT] Bus integrity, offline      : FAIL (210 errors)
+14:41:26.696 [RESULT] RAM addresses independent    : FAIL (2 of 31 coupled)
+14:41:26.696 [RESULT] Tick test, offline          : PASS (120 ticks, 0 missed, max jitter 39 us)
+14:41:26.696 [RESULT] RTC vs ESP32 XTAL, offline  : -75.12 ppm
+14:41:26.696 [RESULT] Bus integrity, RF stress    : FAIL (210 errors)
+14:41:26.696 [RESULT] Tick test, RF stress        : PASS (120 ticks, 0 missed, max jitter 159 us)
+14:41:26.696 [RESULT] RF stress rate shift        : PASS (+0.93 ppm, limit +/-2.0)
+14:41:26.696 [RESULT] ESP32 XTAL vs NTP           : +6.83 ppm
+14:41:26.696 [RESULT] RTC accuracy vs NTP         : FAIL (-67.39 ppm +/- 26.94, -5.82 s/day, -174.7 s/30 days, limit +/-20 ppm)
+14:41:26.696 [RESULT] Cross-check (RTC/XTAL+XTAL/NTP): -67.39 ppm (should match RTC accuracy)
+14:41:26.696 [RESULT] RTC - UTC now               : -7753.9 ms
+14:41:26.696 [RESULT] Die temperature             : 27.2 C -> 33.2 C
+14:41:26.696 [RESULT] ===============================================================
+14:41:26.696 [STAT] up 0d 00:15:56 | WiFi off | heap 219632 (min 111780) | rd_err 0 | jumps 0 | stalls 0 | glitch 0 | die 33.2 C

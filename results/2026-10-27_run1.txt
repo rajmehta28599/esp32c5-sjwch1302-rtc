@@ -1,0 +1,42 @@
+# Run 1, 2026-10-27, board time IST. Host timestamps (NTP-synced PC) left of each line.
+# Firmware: 1.0.0 pre-release (own DS1302 driver; before the RAM alias probe and the 'T' command).
+# Contains: C (precise check), B (benchmark).
+14:08:00.258 >>> C: Check RTC vs NTP (RTC not written)
+14:08:00.258 [WiFi] Connecting ...
+14:08:02.372 [WiFi] Connected. RSSI=-41 dBm CH=8
+14:08:03.884 [NTP ] server pool.ntp.org, round-trip 13.1 ms
+14:08:03.884 [CHECK] RTC - UTC = -7590.3 ms (+/- 6.6 ms)
+14:08:03.884 [CHECK] Since last 'U' (27.03 h): -7590.3 ms -> -78.00 ppm (+/- 1.10), -6.74 s/day  [legacy U: phase assumed 0 +/- 100 ms]
+14:08:03.884 [WiFi] Off (offline)
+14:08:21.063 >>> B: Benchmark suite (non-destructive). 'X' aborts.
+14:08:21.063 [BENCH] FW 1.0.0 | die 28.2 C | ticks/test 120 | accuracy 10 min
+14:08:21.063 [BENCH] --- OFFLINE (WiFi off) ---
+14:08:21.063 [REG] CH=0 24h BCD valid DOW=3 WP=0x00 TCS=0x5C (power-on default, charger off) -> PASS
+14:08:21.063 [WP ] WP=1 reads 0x80, RAM write blocked | WP=0 reads 0x00, RAM write works -> PASS
+14:08:22.877 [BUS off] RAM byte 6200 ops 200 err | RAM burst 10 ops 10 err | clock burst 3000 reads 0 err | 74.8 us per 1-byte read -> FAIL
+14:10:23.651 [TICK off] 120 ticks, 0 missed, 0 noisy captures | RTC vs ESP32 XTAL -75.42 ppm (+/- 0.11) | jitter rms 21.4 us, max 37.7 us | interval 1000007.0..1000138.0 us -> PASS
+14:10:23.651 [WiFi] Connecting ...
+14:10:25.162 [WiFi] Connected. RSSI=-38 dBm CH=8
+14:10:25.162 [BENCH] --- ONLINE + RF STRESS (200 x 1200 B UDP/s to gateway) ---
+14:10:27.127 [BUS rf] RAM byte 6200 ops 200 err | RAM burst 10 ops 10 err | clock burst 3000 reads 0 err | 81.1 us per 1-byte read -> FAIL
+14:12:27.660 [TICK rf] 120 ticks, 0 missed, 0 noisy captures | RTC vs ESP32 XTAL -74.19 ppm (+/- 0.23) | jitter rms 42.9 us, max 185.7 us | interval 999862.0..1000315.0 us -> PASS
+14:12:27.660 [BENCH] stress packets sent 23833, failed 504
+14:12:27.660 [BENCH] --- ONLINE ACCURACY vs NTP (10 min) ---
+14:22:29.047 [ACC] 10.0 min, 600 ticks (0 missed, 0 noisy), NTP 21/21 samples used, best RTT 12.1 ms, offset fit rms 3.03 ms
+14:22:29.047 [WiFi] Off (offline)
+14:22:29.047 [RESULT] ====================== BENCHMARK SUMMARY ======================
+14:22:29.047 [RESULT] Register sanity             : PASS
+14:22:29.047 [RESULT] Write protect               : PASS
+14:22:29.047 [RESULT] Bus integrity, offline      : FAIL (210 errors)
+14:22:29.047 [RESULT] Tick test, offline          : PASS (120 ticks, 0 missed, max jitter 38 us)
+14:22:29.047 [RESULT] RTC vs ESP32 XTAL, offline  : -75.42 ppm
+14:22:29.047 [RESULT] Bus integrity, RF stress    : FAIL (210 errors)
+14:22:29.047 [RESULT] Tick test, RF stress        : PASS (120 ticks, 0 missed, max jitter 186 us)
+14:22:29.047 [RESULT] RF stress rate shift        : PASS (+1.23 ppm, limit +/-2.0)
+14:22:29.047 [RESULT] ESP32 XTAL vs NTP           : +12.44 ppm
+14:22:29.047 [RESULT] RTC accuracy vs NTP         : FAIL (-61.81 ppm +/- 7.65, -5.34 s/day, -160.2 s/30 days, limit +/-20 ppm)
+14:22:29.047 [RESULT] Cross-check (RTC/XTAL+XTAL/NTP): -61.81 ppm (should match RTC accuracy)
+14:22:29.047 [RESULT] RTC - UTC now               : -7662.8 ms
+14:22:29.047 [RESULT] Die temperature             : 28.2 C -> 33.2 C
+14:22:29.047 [RESULT] ===============================================================
+14:22:29.047 [STAT] up 0d 00:14:35 | WiFi off | heap 219540 (min 111644) | rd_err 0 | jumps 0 | stalls 0 | glitch 0 | die 33.2 C
