@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0 — 2026-10-28
+
+- Daily log: `scripts/serial_log.py` writes one log per day when given a
+  directory, stamps each line with the full host date and time when its first
+  byte arrives, resets the ESP32 through RTS if the console is silent for
+  30 s, and with `--summary` refreshes the daily summary every hour.
+- `scripts/daily_summary.py`: per-day table (`results/daily/DAILY.md`) and
+  hourly RTC − PC points (`hourly.csv`), using the NTP-disciplined PC clock as
+  reference. Also collects `C` results (`manual_checks.csv`).
+
 ## 1.1.0 — 2026-10-27
 
 - `firmware/RTC_Test_IDF/`: RTC test for ESP-IDF v6.1. It prints the RTC

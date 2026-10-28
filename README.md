@@ -64,6 +64,32 @@ idf.py -p /dev/ttyACM0 flash monitor                           # Ctrl+] exits th
 
 Close any other serial monitor first: only one program can open the port.
 
+## Daily log
+
+A long-running comparison of the RTC against the PC clock (NTP-disciplined),
+with no WiFi on the board and no `U`. Works with either firmware.
+
+```bash
+mkdir -p logs
+setsid nohup python3 scripts/serial_log.py /dev/ttyACM0 logs logs/cmd.txt \
+    --summary results/daily > logs/serial_log.out 2>&1 < /dev/null &
+tail -f logs/rtc_$(date +%F).log      # watch
+echo -n C > logs/cmd.txt              # send a command to the board
+pkill -f scripts/serial_log.py        # stop
+```
+
+- `logs/rtc_YYYY-MM-DD.log`: every serial line with the host time, one file
+  per day (git-ignored: it contains network details).
+- `results/daily/DAILY.md`: one row per day: RTC lines, time jumps, `[RTC*]`
+  flags, read errors, ESP32 boots, RTC − PC, the drift rate that day and since
+  the last `U`. `hourly.csv` has one RTC − PC point per hour, and
+  `manual_checks.csv` collects `C` results. Rebuilt every hour by the logger,
+  or by hand with `scripts/daily_summary.py`.
+
+RTC − PC per hour comes from the `[RTC ]` print that arrived closest to the
+RTC second edge, which is good to a few ms. Over a day that resolves the rate
+to better than 0.1 ppm. Check the PC clock with `chronyc tracking`.
+
 ## Commands
 
 | Key | Action |
@@ -93,11 +119,12 @@ Normal output, once per second, read only from the RTC:
 ```
 firmware/RTC_Bench/   Arduino bench sketch, DS1302 driver, credentials template
 firmware/RTC_Test_IDF/ ESP-IDF v6.1 RTC test, DS1302 driver in C
-scripts/              build/flash, timestamped serial logger
+scripts/              build/flash, timestamped serial logger, daily summary
 docs/HARDWARE.md      wiring, crystal data, DS1302Z+ comparison, load-capacitance analysis
 docs/BENCHMARK.md     test method and pass limits
 docs/DEVELOPER.md     architecture, design decisions, extending the tests
 results/              measured results and logs from the reference board
+results/daily/        daily RTC − PC comparison (generated)
 ```
 
 ## License
