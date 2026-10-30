@@ -1,4 +1,4 @@
-# Results: reference board, 2026-10-27
+# Results: reference board, 2026-10-27 to 2026-10-30
 
 SJWCH1302Q-W + SJK-7L32768KDY2400A8 (32.768 kHz, CL 12.5 pF) on an ESP32-C5,
 RTC supplied from 3.3 V with a backup cell, room temperature, bench WiFi.
@@ -145,5 +145,43 @@ The crystal's temperature curve, added to the measured −78 ppm bias
 | 70 °C | −159 to −178 ppm | −13.7 to −15.4 s |
 
 Not measured on this bench: backup current, low backup voltage, temperature
-extremes, oscillation margin, and a long powered-only vs battery-only comparison.
+extremes and oscillation margin. A first powered vs battery-only comparison
+is in §7.
 The procedures are in [`../docs/BENCHMARK.md`](../docs/BENCHMARK.md#worst-case-conditions-that-need-extra-equipment).
+
+## 7. Long run against the PC clock (M)
+
+27/10/2026 16:13:40 IST (`U`) to 30/10/2026 12:26 IST, ESP-IDF test firmware.
+WiFi was on only during the `C` checks on 28/10 (11:40, 17:42) and the final
+`C`/`U` on 30/10. Reference: the PC clock, disciplined
+by NTP (chrony). Each point is the hourly RTC − PC value from
+[`daily/hourly.csv`](daily/hourly.csv), taken from the `[RTC ]` print closest
+to the RTC second edge (method: [`../scripts/daily_summary.py`](../scripts/daily_summary.py)).
+
+![RTC minus PC clock over 68 hours](../docs/images/drift-light.svg)
+
+| Quantity | Value | Source |
+|---|---|---|
+| Hourly points | 11, from 19.6 h to 68.0 h after `U` | M |
+| RTC − PC at 67.96 h | −18.792 s | M |
+| Rate, least-squares fit | **−76.42 ppm (−6.60 s/day)** | C from M |
+| Fit intercept at `U` | −84 ms (the `U` write is good to < 1 s by design) | C from M |
+| Residual rms / max | 24 ms / 50 ms | C from M |
+| Firmware `C` check at 68.21 h | −19 s, −77.4 ppm (1 s resolution) | M |
+| Time jumps, `[RTC*]` flags, read errors | 0, 0, 0 | M |
+
+**On the backup cell.** On 28/10 at 18:02 the board was unplugged from USB.
+It came back on 29/10 at 11:16 and the ESP32 booted, so the RTC ran from the
+backup cell alone for **17.2 h**. The hourly points either side of that
+window (24.77 h and 43.05 h after `U`, 17.2 h of the 18.3 h on the cell)
+give **−76.6 ppm**, the same rate as on main power. The register dump at
+the 29/10 boot shows CH = 0 (oscillator running), and no seconds were lost
+or gained: the offset after the gap matches the rate.
+
+**How the run ended.** On 30/10 at 12:26 a USB hub reset re-enumerated the
+board, and an unrequested `U` ran while the logger reopened the port (see the
+known issue in the [README](../README.md#daily-log)). The `C` printed just
+before it is the last point of this run. The gaps in the chart are the 17.2 h
+on the backup cell (no USB, so no log) and 23.1 h with no log (a USB drop
+on 29/10 at 12:10, then a PC reboot).
+

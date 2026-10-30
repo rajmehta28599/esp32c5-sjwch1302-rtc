@@ -1,0 +1,28 @@
+name: Bug report
+description: Something in the firmware or scripts does not work as documented.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Flash firmware/RTC_Test_IDF\n2. Send C\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Firmware, toolchain and board
+      placeholder: "e.g. ESP-IDF v6.1, ESP32-C5 DevKit, commit abc1234"
+  - type: textarea
+    id: log
+    attributes:
+      label: Serial output
+      description: Paste the relevant lines. Remove WiFi names, IP addresses and MAC addresses.
+      render: text

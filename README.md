@@ -1,5 +1,12 @@
 # ESP32-C5 DS1302 RTC Test Bench: SJWCH1302 Drift, ppm and Crystal Measurement
 
+[![MCU: ESP32-C5](https://img.shields.io/badge/MCU-ESP32--C5-e7352c)](https://www.espressif.com/en/products/socs/esp32-c5)
+[![ESP-IDF v6.1](https://img.shields.io/badge/ESP--IDF-v6.1-blue)](firmware/RTC_Test_IDF/)
+[![Arduino-ESP32 3.3](https://img.shields.io/badge/Arduino--ESP32-3.3-00979d)](firmware/RTC_Bench/)
+[![RTC: DS1302 / SJWCH1302](https://img.shields.io/badge/RTC-DS1302%20%2F%20SJWCH1302-555)](docs/HARDWARE.md)
+[![Measured drift: −76 ppm](https://img.shields.io/badge/measured%20drift-%E2%88%9276%20ppm-orange)](results/RESULTS.md#7-long-run-against-the-pc-clock-m)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 Bench firmware and measured results for a **DS1302-compatible RTC
 (SJWCH1302Q-W)** with a **32.768 kHz crystal (3215, ±20 ppm, CL 12.5 pF)** on
 an **ESP32-C5**. Arduino-ESP32 and ESP-IDF v6.1 firmware, a DS1302 driver for
@@ -9,11 +16,29 @@ The firmware runs the board as an offline clock and adds tools to qualify the
 RTC and crystal. It measures the RTC rate against the ESP32 crystal and NTP to
 fractions of a ppm, and checks the chip against the DS1302 datasheet.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/drift-dark.svg">
+  <img alt="RTC minus PC clock over 68 hours: the points fall on a straight line at −76.4 ppm, far outside the ±20 ppm crystal tolerance band, including across 17 hours on the backup cell" src="docs/images/drift-light.svg">
+</picture>
+
+*68 hours of the RTC against the NTP-disciplined PC clock, one point per hour
+(millisecond resolution). The rate is the same on USB power and on the backup
+cell alone. Regenerate with `scripts/plot_drift.py`.*
+
+**Contents:** [Results](#results-on-the-reference-board) ·
+[Quick start](#quick-start) · [Daily log](#daily-log) ·
+[Commands](#commands) · [Repository](#repository) ·
+[Share your result](#share-your-result) · Docs:
+[hardware](docs/HARDWARE.md), [benchmark method](docs/BENCHMARK.md),
+[developer guide](docs/DEVELOPER.md), [all results](results/RESULTS.md)
+
 ## Results on the reference board
 
 | Test | Result |
 |---|---|
 | RTC accuracy (27 h vs NTP, ms readout) | **−78.0 ± 1.1 ppm, −6.74 s/day: FAIL** (crystal limit ±20 ppm) |
+| RTC accuracy (68 h vs NTP-disciplined PC clock, 11 hourly points) | **−76.4 ppm, −6.60 s/day** (least-squares; rms residual 24 ms): **FAIL** |
+| Timekeeping on the backup cell (17.2 h unplugged) | kept running: −76.6 ppm across the window, CH = 0 after; offset after the gap matches the rate (no seconds lost) |
 | Ticks (timed seconds, offline and under WiFi TX) | 0 missed; offline jitter 21 µs rms, 38 µs max |
 | WiFi RF stress effect on rate | +1.2 ppm (limit ±2): no measurable effect |
 | Oscillator start-up after halt | 103–115 ms (5 runs; datasheet: < 1 s) |
@@ -111,6 +136,23 @@ RTC − PC per hour comes from the `[RTC ]` print that arrived closest to the
 RTC second edge, which is good to a few ms. Over a day that resolves the rate
 to better than 0.1 ppm. Check the PC clock with `chronyc tracking`.
 
+Draw the chart at the top of this page from `hourly.csv` (needs matplotlib):
+
+```bash
+scripts/plot_drift.py --gap "USB unplugged
+(backup cell only)" --gap "no log
+(USB drop, PC reboot)" --social      # docs/images/drift-{light,dark}.svg, social-preview.png
+```
+
+> **Known issue (ESP-IDF test firmware).** On 30/10/2026 a USB hub reset
+> re-enumerated the board, and an unrequested `R`, `C`, `U` ran while the
+> logger reopened the port, which ended the 68 h run above. The most likely
+> cause: the host tty echoes the board's output (`[RTC ] U…`) back for a
+> moment before the port is switched to raw mode, and the firmware runs any
+> `r`, `c`, `u`, `l` or `h` byte as a command. Until the firmware accepts only a single
+> letter on its own line, plug the board straight into the PC (not a shared
+> hub) for long runs.
+
 ## Commands
 
 | Key | Action |
@@ -146,7 +188,19 @@ docs/BENCHMARK.md     test method and pass limits
 docs/DEVELOPER.md     architecture, design decisions, extending the tests
 results/              measured results and logs from the reference board
 results/daily/        daily RTC − PC comparison (generated)
+docs/images/          drift chart (light/dark) and the repository social card
 ```
+
+## Share your result
+
+One board is one data point. If you run this bench on another DS1302, a
+different clone, or another crystal, open an issue with the
+**RTC measurement** template: chip marking, crystal part and CL, hours
+logged, and the measured ppm. Results that come with a log are added to a
+comparison table here.
+
+Bug reports and pull requests are welcome; see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

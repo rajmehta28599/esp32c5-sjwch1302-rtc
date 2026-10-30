@@ -1,0 +1,48 @@
+name: RTC measurement
+description: Share a drift result from another DS1302, clone or crystal.
+title: "[result] <chip marking>, <crystal>, <ppm>"
+labels: ["measurement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for adding a data point. Please give only measured or datasheet
+        values, and write "unknown" where you do not know.
+  - type: input
+    id: chip
+    attributes:
+      label: RTC chip marking
+      placeholder: "e.g. DS1302Z+, SJWCH1302Q-W"
+    validations:
+      required: true
+  - type: input
+    id: crystal
+    attributes:
+      label: Crystal part, tolerance and load capacitance (CL)
+      placeholder: "e.g. 32.768 kHz, 3215, ±20 ppm, CL 12.5 pF"
+    validations:
+      required: true
+  - type: input
+    id: board
+    attributes:
+      label: MCU / board and firmware
+      placeholder: "e.g. ESP32-C5, ESP-IDF test firmware 1.1.0"
+  - type: input
+    id: duration
+    attributes:
+      label: Hours logged and reference clock
+      placeholder: "e.g. 48 h against an NTP-disciplined PC clock"
+    validations:
+      required: true
+  - type: input
+    id: ppm
+    attributes:
+      label: Measured rate (ppm or s/day)
+      placeholder: "e.g. −76.4 ppm"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes and log
+      description: Temperature, supply, backup cell, anything unusual. Attach hourly.csv or a log excerpt (remove network details first).

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0 — 2026-10-30
+
+- Results: a 68 h run against the NTP-disciplined PC clock, −76.42 ppm by
+  least-squares over 11 hourly points (rms residual 24 ms), and 17.2 h on
+  the backup cell alone at −76.6 ppm with no time lost
+  ([results/RESULTS.md §7](results/RESULTS.md#7-long-run-against-the-pc-clock-m)).
+- `scripts/plot_drift.py`: drift chart from `hourly.csv` in light and dark
+  SVG, with the ±20 ppm crystal envelope and a least-squares fit, plus a
+  1280×640 social card.
+- README: badges, the drift chart, contents links, a known issue (echo on
+  port reopen can run an unrequested `U`), and how to share a result.
+- `CONTRIBUTING.md` and issue forms for bug reports and RTC measurements.
+
 ## 1.2.1 — 2026-10-29
 
 - `scripts/serial_log.py`: on USB unplug, logs one read error and waits for
