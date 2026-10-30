@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.1 — 2026-10-29
+
+- `scripts/serial_log.py`: on USB unplug, logs one read error and waits for
+  the port to return instead of logging an error every second, and does not
+  try to reset a board that is not there. Drops output the board buffered
+  while the port was closed.
+- `scripts/daily_summary.py`: new *USB drops* column. Lines replayed from the
+  USB buffer at port open no longer count as RTC jumps, and the silence while
+  the port is gone no longer counts as ESP32 stalls.
+- README: descriptive title and use cases; the logger uses the
+  `/dev/serial/by-id/` path.
+
 ## 1.2.0 — 2026-10-28
 
 - Daily log: `scripts/serial_log.py` writes one log per day when given a

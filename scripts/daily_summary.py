@@ -46,7 +46,7 @@ def ist(ts, fmt="%d/%m/%Y %H:%M"):
 
 
 def new_day():
-    return dict(lines=0, ticks=0, jumps=0, flags=0, errors=0, boots=0, resets=0, gaps=0,
+    return dict(lines=0, ticks=0, jumps=0, flags=0, errors=0, boots=0, resets=0, gaps=0, drops=0,
                 first=None, last=None)
 
 
@@ -55,6 +55,7 @@ hours = {}  # (hour start, last U) -> [best N - t, n, t of best]
 manual = []
 prev = None  # (t, N) of the previous [RTC ] line
 pending_c = None
+port_down = False  # between a logger read error and the reopen
 
 for path in sorted(glob.glob(os.path.join(logdir, "rtc_*.log"))):
     with open(path, errors="replace") as f:
@@ -75,10 +76,13 @@ for path in sorted(glob.glob(os.path.join(logdir, "rtc_*.log"))):
             elif "Initializing DS1302" in text:
                 d["boots"] += 1
                 prev = None
+            elif text.startswith("==== read error"):
+                d["drops"] += not port_down
+                port_down = True
             elif text.startswith("==== no data"):
-                d["resets"] += 1
-            elif text.startswith("==== monitor opened"):
-                prev = None
+                d["resets"] += not port_down  # no board to reset while the port is gone
+            elif text.startswith("==== monitor opened") or text.startswith("==== port reopened"):
+                prev, port_down = None, False
 
             m = RE_DRIFT.match(text)
             if m:
@@ -95,6 +99,9 @@ for path in sorted(glob.glob(os.path.join(logdir, "rtc_*.log"))):
             d["ticks"] += 1
             if prev:
                 dt_host, dn = t - prev[0], n - prev[1]
+                if dt_host < 0.5:  # buffered lines replayed at port open, not live
+                    prev = (t, n)
+                    continue
                 if dt_host > 5:
                     d["gaps"] += 1
                 elif abs(dn - dt_host) > 1.5:
@@ -154,9 +161,9 @@ out.append("**Reference:** the PC clock, NTP-disciplined. **RTC − PC** is take
            "**ppm since U** assumes the RTC was exact at the last `U`. "
            f"Expected rate from the 27 h measurement: {NOMINAL_PPM:+.1f} ppm "
            f"({NOMINAL_PPM * 0.0864:+.2f} s/day). Crystal limit: ±20 ppm.\n")
-out.append("| Date (IST) | Logged | RTC lines | Jumps | Flags / read errors | ESP boots / stalls "
+out.append("| Date (IST) | Logged | RTC lines | Jumps | Flags / read errors | ESP boots / stalls | USB drops "
            "| RTC − PC at end | Rate that day | Since last U | Rate since U |")
-out.append("|---|---|---|---|---|---|---|---|---|---|")
+out.append("|---|---|---|---|---|---|---|---|---|---|---|")
 for day in sorted(days):
     d = days[day]
     day_pts = [p for p in pts if dt.datetime.fromtimestamp(p[0], IST).date() == day]
@@ -174,13 +181,14 @@ for day in sorted(days):
         end_s = rate_day = since_s = rate_u = "—"
     logged = f"{(d['last'] - d['first']) / 3600:.1f} h"
     out.append(f"| {day.strftime('%d/%m/%Y')} | {logged} | {d['ticks']} | {d['jumps']} "
-               f"| {d['flags']} / {d['errors']} | {d['boots']} / {d['resets']} "
+               f"| {d['flags']} / {d['errors']} | {d['boots']} / {d['resets']} | {d['drops']} "
                f"| {end_s} | {rate_day} | {since_s} | {rate_u} |")
 
 out.append("\n**Columns.** *Jumps*: consecutive RTC prints whose second count disagrees with "
            "the PC by more than 1.5 s (the RTC skipped or repeated time). *Flags*: `[RTC*]` "
            "lines (halted, not ticking, not set). *ESP stalls*: the console went quiet for "
-           "30 s and the logger reset the ESP32 (the RTC is not reset). "
+           "30 s and the logger reset the ESP32 (the RTC is not reset). *USB drops*: the serial "
+           "port disappeared (board unplugged or USB re-enumerated) until it was reopened. "
            "Hourly values: [hourly.csv](hourly.csv).\n")
 
 if rows:

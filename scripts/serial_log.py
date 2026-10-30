@@ -14,7 +14,8 @@ LOG/rtc_YYYY-MM-DD.log. Each line starts with the host time,
 YYYY-MM-DDTHH:MM:SS.mmm+hh:mm (stamped when the first byte of the line
 arrives). With --summary, scripts/daily_summary.py LOG OUTDIR runs every
 hour. If the board prints nothing for 30 s, the logger resets the ESP32
-through RTS (the RTC keeps running).
+through RTS (the RTC keeps running). If the port disappears (USB unplugged),
+it logs one read error and reopens the port once the board is back.
 
 Requires pyserial.
 """
@@ -37,7 +38,9 @@ open(cmdf, "w").close()
 
 
 def open_port():
-    return serial.Serial(port, 115200, timeout=0.05)
+    s = serial.Serial(port, 115200, timeout=0.05)
+    s.reset_input_buffer()  # drop output the board buffered while the port was closed
+    return s
 
 
 p = open_port()
@@ -87,6 +90,15 @@ while True:
         next_summary = time.monotonic() + SUMMARY_EVERY_S
         subprocess.Popen([sys.executable, summary_script, log, summary_dir],
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if p is None:  # board unplugged: retry quietly until it re-enumerates
+        time.sleep(1)
+        try:
+            p = open_port()
+            write(now(), "==== port reopened")
+            last_rx = time.monotonic()
+        except Exception:
+            pass
+        continue
     if time.monotonic() - max(last_rx, last_reset) > QUIET_RESET_S:
         write(now(), f"==== no data for {QUIET_RESET_S} s, resetting the ESP32")
         last_reset = time.monotonic()
@@ -98,13 +110,11 @@ while True:
         d = p.read(p.in_waiting or 1)
     except Exception as e:  # board reset / re-enumeration
         write(now(), f"==== read error: {e}")
-        time.sleep(1)
         try:
             p.close()
-            p = open_port()
-            write(now(), "==== port reopened")
         except Exception:
             pass
+        p = None
         continue
     if d:
         last_rx = time.monotonic()

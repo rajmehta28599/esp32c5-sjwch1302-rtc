@@ -1,8 +1,9 @@
-# esp32c5-sjwch1302-rtc-bench
+# ESP32-C5 DS1302 RTC Test Bench: SJWCH1302 Drift, ppm and Crystal Measurement
 
 Bench firmware and measured results for a **DS1302-compatible RTC
 (SJWCH1302Q-W)** with a **32.768 kHz crystal (3215, ±20 ppm, CL 12.5 pF)** on
-an **ESP32-C5**.
+an **ESP32-C5**. Arduino-ESP32 and ESP-IDF v6.1 firmware, a DS1302 driver for
+both, and Python scripts that log the RTC against an NTP-synced PC clock.
 
 The firmware runs the board as an offline clock and adds tools to qualify the
 RTC and crystal. It measures the RTC rate against the ESP32 crystal and NTP to
@@ -33,6 +34,19 @@ takes **12.2 ms**, because `gpio_config()` calls `rtc_gpio_deinit()`. A
 DS1302 driver that flips the IO line with `pinMode()` (such as ErriezDS1302)
 blocks ~24.5 ms per transfer. This repo's driver uses `gpio_set_direction()`
 and needs 75 µs per register read.
+
+## Use this repo if
+
+- your **DS1302 runs slow or fast** and you want the error in ppm and s/day,
+  not a guess;
+- you are bringing up a **DS1302 or a DS1302 clone (SJWCH1302)** on an
+  **ESP32-C5** (or another ESP32) with Arduino or ESP-IDF;
+- you need to check a **32.768 kHz crystal's load capacitance** against the RTC
+  chip's internal load;
+- `pinMode()` is **unexpectedly slow on ESP32-C5 GPIO0..6** and stalls a
+  bit-banged driver;
+- you want a **long-running RTC drift log** (hourly RTC − NTP points, daily
+  summary) without WiFi on the board.
 
 ## Quick start
 
@@ -71,17 +85,24 @@ with no WiFi on the board and no `U`. Works with either firmware.
 
 ```bash
 mkdir -p logs
-setsid nohup python3 scripts/serial_log.py /dev/ttyACM0 logs logs/cmd.txt \
+PORT=/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_XX:XX:XX:XX:XX:XX-if00
+setsid nohup python3 scripts/serial_log.py "$PORT" logs logs/cmd.txt \
     --summary results/daily > logs/serial_log.out 2>&1 < /dev/null &
 tail -f logs/rtc_$(date +%F).log      # watch
 echo -n C > logs/cmd.txt              # send a command to the board
 pkill -f scripts/serial_log.py        # stop
 ```
 
+Use the `/dev/serial/by-id/` path (`ls /dev/serial/by-id/`), not `/dev/ttyACMn`.
+If the board is unplugged and comes back, or another ESP32 is plugged in, the
+`ttyACM` number can change; the by-id path follows this board, and the logger
+reopens it when it returns. The logger stops while the PC sleeps, so turn off
+suspend for long runs.
+
 - `logs/rtc_YYYY-MM-DD.log`: every serial line with the host time, one file
   per day (git-ignored: it contains network details).
 - `results/daily/DAILY.md`: one row per day: RTC lines, time jumps, `[RTC*]`
-  flags, read errors, ESP32 boots, RTC − PC, the drift rate that day and since
+  flags, read errors, ESP32 boots, USB drops, RTC − PC, the drift rate that day and since
   the last `U`. `hourly.csv` has one RTC − PC point per hour, and
   `manual_checks.csv` collects `C` results. Rebuilt every hour by the logger,
   or by hand with `scripts/daily_summary.py`.
