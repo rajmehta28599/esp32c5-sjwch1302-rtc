@@ -91,8 +91,9 @@ Module*, **USB CDC On Boot: Disabled**, upload, Serial Monitor at 115200.
 Arduino). It prints the RTC time once per second and keeps the last-update
 record in the same RTC RAM bytes as the Arduino firmware. It has the commands
 `U` (set from NTP), `C` (drift check, 1 s resolution), `R` (register/RAM dump),
-`L` (last update) and `H` (help). The benchmark suites are in the Arduino
-firmware only.
+`L` (last update) and `H` (help). Type the letter, then Enter: a command is one
+letter alone on a line, and longer lines are ignored. The benchmark suites are
+in the Arduino firmware only.
 
 ```bash
 cd firmware/RTC_Test_IDF
@@ -114,7 +115,7 @@ PORT=/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_XX:XX:XX:XX:XX:X
 setsid nohup python3 scripts/serial_log.py "$PORT" logs logs/cmd.txt \
     --summary results/daily > logs/serial_log.out 2>&1 < /dev/null &
 tail -f logs/rtc_$(date +%F).log      # watch
-echo -n C > logs/cmd.txt              # send a command to the board
+echo C > logs/cmd.txt                 # send a command to the board
 pkill -f scripts/serial_log.py        # stop
 ```
 
@@ -144,14 +145,16 @@ scripts/plot_drift.py --gap "USB unplugged
 (USB drop, PC reboot)" --social      # docs/images/drift-{light,dark}.svg, social-preview.png
 ```
 
-> **Known issue (ESP-IDF test firmware).** On 30/10/2026 a USB hub reset
+> **Fixed in 1.4.0 (ESP-IDF test firmware).** On 30/10/2026 a USB hub reset
 > re-enumerated the board, and an unrequested `R`, `C`, `U` ran while the
 > logger reopened the port, which ended the 68 h run above. The most likely
 > cause: the host tty echoes the board's output (`[RTC ] U…`) back for a
-> moment before the port is switched to raw mode, and the firmware runs any
-> `r`, `c`, `u`, `l` or `h` byte as a command. Until the firmware accepts only a single
-> letter on its own line, plug the board straight into the PC (not a shared
-> hub) for long runs.
+> moment before the port is switched to raw mode, and the firmware ran any
+> `r`, `c`, `u`, `l` or `h` byte as a command. Since 1.4.0 a command is one
+> letter alone on a line, a partial line is dropped after 3 s of silence,
+> and the logger opens the port exclusively and ends each command with a
+> newline. The Arduino bench firmware still takes single keys: do not leave
+> it under a long unattended log.
 
 ## Commands
 

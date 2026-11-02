@@ -33,6 +33,7 @@
 #define RAM_SYNC_MAGIC 0xC5
 
 #define WIFI_CONNECTED_BIT BIT0
+#define CMD_IDLE_RESET_MS 3000
 
 static const ds1302_t rtc = {
     .clk = DS1302_CLK_PIN,
@@ -49,6 +50,9 @@ static uint32_t s_last_printed_epoch;
 static int64_t s_last_poll_ms;
 static int64_t s_last_print_ms;
 static uint32_t s_sync_epoch;
+static int s_cmd_char;
+static int s_cmd_len;
+static int64_t s_cmd_last_ms;
 
 static int64_t millis(void) { return esp_timer_get_time() / 1000; }
 
@@ -211,7 +215,7 @@ static void print_help(void)
     con_printf("  R : Raw register / RAM dump\n");
     con_printf("  L : Show when the RTC was last updated ('U')\n");
     con_printf("  H : This help\n");
-    con_printf("  Otherwise time is read only from the external RTC.\n");
+    con_printf("  Type the letter, then Enter. Otherwise time is read only from the external RTC.\n");
     con_printf("=============================================================\n");
 }
 
@@ -412,6 +416,38 @@ static void handle_command(int c)
     }
 }
 
+/* A command is one letter alone on a line ("C\r\n"). Longer lines are
+ * ignored: when a monitor opens the port, the host tty can echo the board's
+ * own output (e.g. "[RTC ] Unix ...") back before it switches to raw mode,
+ * and single-key handling ran those letters as R, C, U. A partial line is
+ * dropped after CMD_IDLE_RESET_MS of silence, so an echoed fragment cannot
+ * prefix the next real command. */
+static void poll_console(void)
+{
+    int c;
+    while ((c = con_getc()) >= 0) {
+        int64_t now = millis();
+        if (now - s_cmd_last_ms > CMD_IDLE_RESET_MS) {
+            s_cmd_len = 0;
+        }
+        s_cmd_last_ms = now;
+        if (c == '\r' || c == '\n') {
+            if (s_cmd_len == 1) {
+                handle_command(s_cmd_char);
+                s_cmd_last_ms = millis();
+            }
+            s_cmd_len = 0;
+        } else if (c != ' ' && c != '\t') {
+            if (s_cmd_len == 0) {
+                s_cmd_char = c;
+            }
+            if (s_cmd_len < 2) {
+                s_cmd_len++;
+            }
+        }
+    }
+}
+
 static void poll_rtc(void)
 {
     if (millis() - s_last_poll_ms < 100) {
@@ -471,10 +507,7 @@ void app_main(void)
     }
 
     while (true) {
-        int c;
-        while ((c = con_getc()) >= 0) {
-            handle_command(c);
-        }
+        poll_console();
         poll_rtc();
         vTaskDelay(pdMS_TO_TICKS(10));
     }

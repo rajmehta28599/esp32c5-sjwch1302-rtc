@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Serial logger for the RTC firmware.
 
-Holds the port open, writes every line with a host timestamp, and sends
-whatever text is written into CMD to the board (the file is then emptied).
+Holds the port open (exclusively), writes every line with a host timestamp,
+and sends whatever text is written into CMD to the board, ending it with a
+newline if it has none (the file is then emptied).
 Host timestamps make it possible to compare the RTC against the PC clock
 (see scripts/daily_summary.py).
 
@@ -38,7 +39,7 @@ open(cmdf, "w").close()
 
 
 def open_port():
-    s = serial.Serial(port, 115200, timeout=0.05)
+    s = serial.Serial(port, 115200, timeout=0.05, exclusive=True)
     s.reset_input_buffer()  # drop output the board buffered while the port was closed
     return s
 
@@ -132,6 +133,8 @@ while True:
         c = open(cmdf).read()
         if c:
             open(cmdf, "w").close()
+            if not c.endswith("\n"):
+                c += "\n"  # the firmware takes one letter on its own line
             p.write(c.encode())
             write(now(), f">>>> sent {c!r}")
     except Exception:

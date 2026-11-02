@@ -162,7 +162,9 @@ bytes and verifies the restore.
 
 ## Serial protocol
 
-Single characters at 115200 baud: `U C B D T E W S R L X H` (see `H`). Output
+Arduino bench: single characters at 115200 baud: `U C B D T E W S R L X H`
+(see `H`). ESP-IDF test: one letter alone on a line (`U C R L H` + Enter);
+other lines are ignored. Output
 lines start with a tag so logs can be filtered:
 
 | Tag | Meaning |

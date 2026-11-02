@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.0 — 2026-11-02
+
+- `firmware/RTC_Test_IDF/`: a command is now one letter alone on a line
+  (`C` + Enter); longer lines are ignored, and a partial line is dropped
+  after 3 s of silence. Before, any `r`, `c`, `u`, `l` or `h` byte ran a
+  command, so board output echoed back by the host tty while a monitor
+  reopened the port could run an unrequested `U` (seen on 30/10/2026 after a
+  USB hub reset). Tested on the reference board: `LH` ignored, `L` runs.
+- `scripts/serial_log.py`: opens the port exclusively, and ends each command
+  from the command file with a newline (`echo -n C` still works).
+
 ## 1.3.0 — 2026-10-30
 
 - Results: a 68 h run against the NTP-disciplined PC clock, −76.42 ppm by
