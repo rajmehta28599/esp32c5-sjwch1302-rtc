@@ -51,9 +51,9 @@ what was **measured** on this board.
 | Package | 8-pin SO, 150 mil | SOP8 (supplier listing) |
 | Operating temperature | 0 to +70 °C (DS1302ZN+: −40 to +85 °C) | 0 to 70 °C (supplier listing) |
 | Pinout | VCC2, X1, X2, GND, CE, I/O, SCLK, VCC1 | drop-in on this PCB (measured: works) |
-| Supply VCC1 / VCC2 | 2.0 to 5.5 V | not published; tested at 3.3 V only |
+| Supply VCC1 / VCC2 | 2.0 to 5.5 V | not published; this board is designed to the DS1302Z+ range (2.0 to 5.5 V). Tested at 3.3 V only |
 | Supply switchover | VCC2 when VCC2 > VCC1 + 0.2 V | not published |
-| Timekeeping current on backup (VCC1) | 0.3 µA max at 2.0 V, 1 µA max at 5 V | not published, not measured |
+| Timekeeping current on backup (VCC1) | 0.3 µA max at 2.0 V, 1 µA max at 5 V | not published, not measured. **Measured**: keeps time on the backup cell alone (17.2 h unplugged, same rate, CH = 0 after) |
 | Timekeeping current on VCC2 | 25.3 µA max at 2.0 V, 81 µA max at 5 V | not published, not measured |
 | Crystal load the oscillator is designed for | 6 pF | not published; measured behaviour suggests a much larger load (see below) |
 | Crystal ESR | 45 kΩ max | not published; starts reliably with a 70 kΩ-max crystal |
@@ -69,7 +69,7 @@ what was **measured** on this board.
 | Trickle charger register power-on value | 0x5C (disabled) | **measured**: 0x5C |
 | Battery-backed RAM | **31 bytes** | **measured: 30 usable.** Writes to RAM 8 are ignored and RAM 8 reads back RAM 7. |
 | Burst mode (clock and RAM) | yes | **measured**: works, except RAM byte 8 |
-| Accuracy | crystal + load match + temperature | **measured with this crystal: −78.0 ± 1.1 ppm** (−6.74 s/day, over 27 h) |
+| Accuracy | crystal + load match + temperature | **measured with this crystal: −78.0 ± 1.1 ppm** (−6.74 s/day, over 27 h); **−76.8 ppm (−6.64 s/day) over 166.9 h (7 days)**, −46.15 s against the NTP-disciplined PC clock |
 
 ### What the RAM result means
 Firmware written for a DS1302 that stores data in RTC RAM byte 8 will silently
@@ -112,7 +112,8 @@ in this order:
 4. long X1/X2 traces or a ground pour close to them
 
 The rate is stable: −75 ppm (first 63 h), −77.4 ppm (25 h, ±1 s
-readout), and −78.0 ± 1.1 ppm (27 h, millisecond readout). That points to a
+readout), −78.0 ± 1.1 ppm (27 h, millisecond readout), −76.4 ppm (68 h,
+hourly fit) and −76.8 ppm (166.9 h, 7 days since one `U`). That points to a
 fixed load error, not a marginal oscillator. Start-up is fast (≈ 110 ms), which
 also argues against a weak oscillator.
 
