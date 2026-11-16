@@ -69,12 +69,27 @@ what was **measured** on this board.
 | Trickle charger register power-on value | 0x5C (disabled) | **measured**: 0x5C |
 | Battery-backed RAM | **31 bytes** | **measured: 30 usable.** Writes to RAM 8 are ignored and RAM 8 reads back RAM 7. |
 | Burst mode (clock and RAM) | yes | **measured**: works, except RAM byte 8 |
-| Accuracy | crystal + load match + temperature | **measured with this crystal: −78.0 ± 1.1 ppm** (−6.74 s/day, over 27 h); **−76.8 ppm (−6.64 s/day) over 166.9 h (7 days)**, −46.15 s against the NTP-disciplined PC clock |
+| Accuracy | crystal + load match + temperature | **measured with this crystal: −78.0 ± 1.1 ppm** (−6.74 s/day, over 27 h); **−77.2 ppm (−6.67 s/day) over 407.0 h (17 days)**, −113.0 s against the NTP-disciplined PC clock |
 
 ### What the RAM result means
 Firmware written for a DS1302 that stores data in RTC RAM byte 8 will silently
 read back byte 7 instead. Avoid byte 8. This firmware keeps its records in
 bytes 0..4 and 10..14.
+
+### What the accuracy result means over 17 days
+Error after 407.0 h (16.96 days) without a time sync. The DS1302Z+ columns
+are **calculated** from the crystal tolerance and the load analysis below;
+only the SJWCH1302Q-W column is measured.
+
+| | DS1302Z+, crystal matched to 6 pF (±20 ppm) | DS1302Z+ with this board's 12.5 pF crystal | SJWCH1302Q-W, this board |
+|---|---|---|---|
+| Rate | 0 ± 20 ppm (C) | +66 to +122 ppm, fast (C) | **−77.2 ppm, slow (M)** |
+| Per day | within ±1.7 s | +5.7 to +10.5 s | **−6.67 s** |
+| After 17 days | within ±29 s | +97 to +179 s | **−113.0 s** |
+| Per 30 days | within ±52 s | +2.9 to +5.3 min | **−3.3 min** |
+
+Every millisecond-resolution run, from 27 h to 17 days, gave −76.4 to −78.0 ppm, so a
+firmware correction (see Recommendations) removes most of it.
 
 ## Why the clock runs slow: load capacitance (calculated)
 
@@ -113,7 +128,7 @@ in this order:
 
 The rate is stable: −75 ppm (first 63 h), −77.4 ppm (25 h, ±1 s
 readout), −78.0 ± 1.1 ppm (27 h, millisecond readout), −76.4 ppm (68 h,
-hourly fit) and −76.8 ppm (166.9 h, 7 days since one `U`). That points to a
+hourly fit), −76.8 ppm (7 days) and −77.2 ppm (17 days since one `U`). That points to a
 fixed load error, not a marginal oscillator. Start-up is fast (≈ 110 ms), which
 also argues against a weak oscillator.
 

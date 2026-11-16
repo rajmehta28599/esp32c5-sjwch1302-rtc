@@ -4,7 +4,7 @@
 [![ESP-IDF v6.1](https://img.shields.io/badge/ESP--IDF-v6.1-blue)](firmware/RTC_Test_IDF/)
 [![Arduino-ESP32 3.3](https://img.shields.io/badge/Arduino--ESP32-3.3-00979d)](firmware/RTC_Bench/)
 [![RTC: DS1302 / SJWCH1302](https://img.shields.io/badge/RTC-DS1302%20%2F%20SJWCH1302-555)](docs/HARDWARE.md)
-[![Measured drift: −76 ppm](https://img.shields.io/badge/measured%20drift-%E2%88%9276%20ppm-orange)](results/RESULTS.md#7-long-run-against-the-pc-clock-m)
+[![Measured drift: −77 ppm](https://img.shields.io/badge/measured%20drift-%E2%88%9277%20ppm-orange)](results/RESULTS.md#8-17-days-on-one-u-m)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Bench firmware and measured results for a **DS1302-compatible RTC
@@ -38,6 +38,7 @@ cell alone. Regenerate with `scripts/plot_drift.py`.*
 |---|---|
 | RTC accuracy (27 h vs NTP, ms readout) | **−78.0 ± 1.1 ppm, −6.74 s/day: FAIL** (crystal limit ±20 ppm) |
 | RTC accuracy (68 h vs NTP-disciplined PC clock, 11 hourly points) | **−76.4 ppm, −6.60 s/day** (least-squares; rms residual 24 ms): **FAIL** |
+| RTC accuracy (17 days on one `U`, vs NTP-disciplined PC clock) | **−113.0 s after 407.0 h: −77.2 ppm, −6.67 s/day: FAIL** (a matched DS1302Z+ would be within ±29 s) |
 | Timekeeping on the backup cell (17.2 h unplugged) | kept running: −76.6 ppm across the window, CH = 0 after; offset after the gap matches the rate (no seconds lost) |
 | Ticks (timed seconds, offline and under WiFi TX) | 0 missed; offline jitter 21 µs rms, 38 µs max |
 | WiFi RF stress effect on rate | +1.2 ppm (limit ±2): no measurable effect |

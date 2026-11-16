@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Results: 17 days on one `U`, −113.0 s after 407.0 h (−77.2 ppm,
+  −6.67 s/day) ([results/RESULTS.md §8](results/RESULTS.md#8-17-days-on-one-u-m)).
+- `docs/HARDWARE.md`: DS1302Z+ vs SJWCH1302Q-W over 17 days, the 17-day
+  accuracy figure, and the board's supply design range.
+
 ## 1.4.0 — 2026-11-02
 
 - `firmware/RTC_Test_IDF/`: a command is now one letter alone on a line

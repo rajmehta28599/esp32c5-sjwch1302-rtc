@@ -185,3 +185,25 @@ before it is the last point of this run. The gaps in the chart are the 17.2 h
 on the backup cell (no USB, so no log) and 23.1 h with no log (a USB drop
 on 29/10 at 12:10, then a PC reboot).
 
+## 8. 17 days on one `U` (M)
+
+30/10/2026 12:26:34 IST (`U`, read-back diff +0 s) to 16/11/2026 11:24 IST,
+ESP-IDF test firmware, same reference and method as §7. No `U` in between;
+WiFi on only for two `C` checks. The PC was off, asleep or not logging for
+most of the run, so the points come in clusters; the RTC kept counting
+through every gap.
+
+| Quantity | Value | Source |
+|---|---|---|
+| RTC − PC at 166.86 h (06/11) | −46.101 s (−76.8 ppm since `U`) | M |
+| RTC − PC at 406.97 h (16/11) | **−113.032 s (−77.15 ppm, −6.67 s/day since `U`)** | M |
+| Rate 06/11 → 16/11 (237.4 h) | −77.4 ppm | C from M |
+| Rate, least-squares fit, 16 points (0.02 h to 406.97 h) | −77.01 ppm (−6.65 s/day); intercept +14 ms; rms 94 ms | C from M |
+| Firmware `C` at 166.87 h / 406.80 h | −46 s, −76.6 ppm / −113 s, −77.2 ppm (1 s resolution) | M |
+| Register dump on 16/11 | CH = 0, RAM test pass, last-`U` record intact | M |
+
+The fit leaves out the 03/11 10:00 hourly point (+496 ms off the line): it
+was taken from a burst of buffered lines that arrived together after a USB
+re-enumeration, so its host timestamps are late. The 10-day stretch to 16/11
+ran 0.6 ppm slower than the first week, within what room-temperature changes
+can cause (§6).
